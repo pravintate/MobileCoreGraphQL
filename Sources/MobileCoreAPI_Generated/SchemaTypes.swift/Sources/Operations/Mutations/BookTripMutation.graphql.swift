@@ -2,7 +2,6 @@
 // This file was automatically generated and should not be edited.
 
 @_exported import ApolloAPI
-import MobileCoreAPI_Generated
 
 public class BookTripMutation: GraphQLMutation {
   public static let operationName: String = "BookTrip"
@@ -11,9 +10,9 @@ public class BookTripMutation: GraphQLMutation {
       #"mutation BookTrip($ids: [ID]!) { bookTrips(launchIds: $ids) { __typename message } }"#
     ))
 
-  public var ids: [MobileCoreAPI_Generated.ID?]
+  public var ids: [ID?]
 
-  public init(ids: [MobileCoreAPI_Generated.ID?]) {
+  public init(ids: [ID?]) {
     self.ids = ids
   }
 

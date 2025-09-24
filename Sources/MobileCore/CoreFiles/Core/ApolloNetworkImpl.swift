@@ -77,11 +77,23 @@ final class ApolloNetworkImpl: GraphQLNetwork {
     }
 
     func subscribe<Subscription: GraphQLSubscription>(
-        subscription: Subscription,
-        resultHandler: @escaping (Result<GraphQLResult<Subscription.Data>, Error>) -> Void
-    ) throws -> any Apollo.Cancellable {
-        let client = try getClient()
-        clientProvider.updateAuthorizationHeader(with: configuration.authorizationTokenProvider())
-        return client.subscribe(subscription: subscription, resultHandler: resultHandler)
-    }
+        subscription: Subscription) async throws -> AsyncThrowingStream<GraphQLResult<Subscription.Data>, Error> {
+            let client = try getClient()
+            clientProvider.updateAuthorizationHeader(with: configuration.authorizationTokenProvider())
+            return AsyncThrowingStream { continuation in
+                let cancellable = client.subscribe(subscription: subscription) { result in
+                    switch result {
+                    case .success(let graphQLResult):
+                        continuation.yield(graphQLResult)
+                    case .failure(let error):
+                        continuation.finish(throwing: error)
+                        return
+                    }
+                }
+                // When the stream is cancelled, cancel the subscription
+                continuation.onTermination = { @Sendable _ in
+                    cancellable.cancel()
+                }
+            }
+        }
 }

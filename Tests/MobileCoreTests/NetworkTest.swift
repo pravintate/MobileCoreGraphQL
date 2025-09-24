@@ -9,7 +9,6 @@ import XCTest
 @testable import MobileCoreAPI_Generated
 @testable import Apollo
 
-
 final class NetworkTests: XCTestCase {
     func testLauchRepository() async {
         let repository = LaunchRepositoryImpl()
@@ -47,24 +46,59 @@ final class NetworkTests: XCTestCase {
     func testTripBookedSubscription() async throws {
         let expectation = expectation(description: "Receive trip booked update")
 
-        let tripRepository = TripRepositoryImpl() // pass your actual ApolloNetworkImpl
-        var subscription: Apollo.Cancellable?
+        let tripRepository = TripRepositoryImpl() // Your repository
 
-        // 1️⃣ Start listening for subscription updates
-        subscription = tripRepository.observeTripBooked { tripsBooked in
-            if let booked = tripsBooked {
-                print("Number of trips booked: \(booked)")
-                expectation.fulfill() // subscription fired
-            } else {
-                XCTFail("Failed to get booked trips update")
+        // 1️⃣ Start the subscription concurrently
+        let subscriptionStream = try await tripRepository.subscribe()
+        let subscriptionTask = Task {
+            do {
+                for try await result in subscriptionStream {
+                    if let value = result.data?.tripsBooked {
+                        let str = String(value)
+                        print("Received trip booked update: \(str)")
+                        expectation.fulfill()
+                        break // Stop after first update if desired
+                    }
+                }
+            } catch {
+                XCTFail("Subscription failed: \(error)")
             }
         }
 
-        // 2️⃣ Wait a tiny moment to ensure the subscription is connected
+        // 2️⃣ Wait a tiny moment to ensure subscription is connected
+        try await Task.sleep(nanoseconds: 5_000_000_000) // 0.5 sec
+
+        // 3️⃣ Fire the mutation that triggers the subscription
+        let bookRepo = BookTripRepositoryImpl()
+        do {
+            let result = try await bookRepo.bookTrip(trips: ["1", "2", "3", "4"])
+            print("Mutation result: \(result)")
+        } catch {
+            XCTFail("Mutation failed: \(error)")
+        }
+
+        // 4️⃣ Wait for the subscription to emit (max 8 seconds)
+        await fulfillment(of: [expectation], timeout: 8)
+
+        // 5️⃣ Cancel the subscription task
+        subscriptionTask.cancel()
+
+        print("Done")
+    }
+
+
+    let viewModal = TripViewModal(repository: TripRepositoryImpl())
+    func testViewModal() async throws {
+        let expectation = DispatchSemaphore(value: 0) // Use for simple sync wait
+
+        viewModal.updateValue = { value in
+            print("Received value: \(value)")
+            // Signal that we received an update
+            expectation.signal()
+        }
+
+        viewModal.listenSubscription()
         try await Task.sleep(nanoseconds: 5_000_000_000) // 0.2 sec
-        
-        print("fire query now")
-        // 3️⃣ Perform the mutation that triggers the subscription
         let repository = BookTripRepositoryImpl()
         do {
             let result = try await repository.bookTrip(trips: ["1", "2", "3", "4"])
@@ -72,12 +106,13 @@ final class NetworkTests: XCTestCase {
         } catch {
             XCTFail("Mutation failed: \(error)")
         }
+        // Wait for the first value from subscription (timeout after 5 seconds)
+        let timeout = DispatchTime.now() + .seconds(5)
+        if expectation.wait(timeout: timeout) == .timedOut {
+            print("Test timed out waiting for subscription value")
+        }
 
-        // 4️⃣ Wait for the subscription to emit
-        await fulfillment(of: [expectation], timeout: 8)
-        // 5️⃣ Cancel subscription to clean up
-        subscription?.cancel()
-        print("done")
+        viewModal.stopListening()
     }
 }
 

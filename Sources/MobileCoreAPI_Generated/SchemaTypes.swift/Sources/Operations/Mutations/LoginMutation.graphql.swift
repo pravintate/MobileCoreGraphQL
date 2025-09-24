@@ -2,7 +2,6 @@
 // This file was automatically generated and should not be edited.
 
 @_exported import ApolloAPI
-import MobileCoreAPI_Generated
 
 public class LoginMutation: GraphQLMutation {
   public static let operationName: String = "Login"

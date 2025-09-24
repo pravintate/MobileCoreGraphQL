@@ -14,9 +14,8 @@ protocol LaunchRepository {
 struct LaunchRepositoryImpl: LaunchRepository {
     private let network: GraphQLNetwork
 
-    init(networkFactory: ApolloNetworkFactory = ApolloNetworkFactoryImpl(),
-         configurationProvider: ApolloConfigurationProvider = DefaultApolloConfigurationProvider()) {
-        self.network = networkFactory.makeNetwork(configurationProvider: configurationProvider)
+    init(networkFactory: ApolloNetworkFactory = ApolloNetworkFactoryImpl()) {
+        self.network = networkFactory.makeNetwork()
     }
 
     func fetchLaunches() async throws -> [LaunchDomain] {

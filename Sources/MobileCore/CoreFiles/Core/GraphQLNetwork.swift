@@ -19,7 +19,6 @@ public protocol GraphQLNetwork {
     ) async throws -> Mutation.Data
 
     func subscribe<Subscription: GraphQLSubscription>(
-        subscription: Subscription,
-        resultHandler: @escaping (Result<GraphQLResult<Subscription.Data>, Error>) -> Void
-    ) throws -> any Apollo.Cancellable
+        subscription: Subscription) async throws ->
+    AsyncThrowingStream<GraphQLResult<Subscription.Data>, Error>
 }

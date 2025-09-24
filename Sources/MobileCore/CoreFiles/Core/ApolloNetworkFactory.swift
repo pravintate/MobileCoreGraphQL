@@ -7,11 +7,16 @@
 
 
 protocol ApolloNetworkFactory {
-    func makeNetwork(configurationProvider: ApolloConfigurationProvider) -> GraphQLNetwork
+    func makeNetwork() -> GraphQLNetwork
 }
 
 struct ApolloNetworkFactoryImpl: ApolloNetworkFactory {
-    func makeNetwork(configurationProvider: ApolloConfigurationProvider = DefaultApolloConfigurationProvider()) -> GraphQLNetwork {
+    let configurationProvider: ApolloConfigurationProvider
+    init(configurationProvider: ApolloConfigurationProvider = DefaultApolloConfigurationProvider()) {
+        self.configurationProvider = configurationProvider
+    }
+
+    func makeNetwork() -> GraphQLNetwork {
         return ApolloNetworkImpl(configuration: configurationProvider.configuration)
     }
 }

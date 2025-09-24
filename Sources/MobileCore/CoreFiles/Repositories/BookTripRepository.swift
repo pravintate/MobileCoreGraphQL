@@ -13,9 +13,8 @@ protocol BookTripRepository {
 struct BookTripRepositoryImpl: BookTripRepository {
     private let network: GraphQLNetwork
 
-    init(networkFactory: ApolloNetworkFactory = ApolloNetworkFactoryImpl(),
-         configurationProvider: ApolloConfigurationProvider = DefaultApolloConfigurationProvider()) {
-        self.network = networkFactory.makeNetwork(configurationProvider: configurationProvider)
+    init(networkFactory: ApolloNetworkFactory = ApolloNetworkFactoryImpl()) {
+        self.network = networkFactory.makeNetwork()
     }
 
     func bookTrip(trips: [String]) async throws -> String {

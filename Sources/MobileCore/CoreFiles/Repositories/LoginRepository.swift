@@ -12,9 +12,8 @@ protocol LoginRepository {
 struct LoginRepositoryImpl: LoginRepository {
     private let network: GraphQLNetwork
 
-    init(networkFactory: ApolloNetworkFactory = ApolloNetworkFactoryImpl(),
-         configurationProvider: ApolloConfigurationProvider = DefaultApolloConfigurationProvider()) {
-        self.network = networkFactory.makeNetwork(configurationProvider: configurationProvider)
+    init(networkFactory: ApolloNetworkFactory = ApolloNetworkFactoryImpl()) {
+        self.network = networkFactory.makeNetwork()
     }
     func doLogin(_ emailId: String) async throws -> Login {
         let result = try await network.perform(mutation: LoginMutation(email: emailId))

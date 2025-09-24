@@ -16,14 +16,4 @@ struct LaunchDomain: CustomStringConvertible {
         "Launch(id: \(id), site: \(site ?? "nil"))"
     }
 }
-extension LaunchListQuery.Data.Launches {
-    func toDomain() -> [LaunchDomain] {
-        launches.compactMap { $0?.toDomain() }
-    }
-}
 
-extension LaunchListQuery.Data.Launches.Launch {
-    func toDomain() -> LaunchDomain {
-        LaunchDomain(id: self.id, site: self.site)
-    }
-}
