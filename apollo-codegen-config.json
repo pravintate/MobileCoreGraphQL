@@ -1,0 +1,42 @@
+{
+  "schemaNamespace": "MobileCoreAPI_Generated",
+  "input": {
+    "operationSearchPaths": [
+      "Sources/MobileCoreAPI_Generated/Operations/**/*.graphql"
+    ],
+    "schemaSearchPaths": [
+      "Sources/MobileCoreAPI_Generated/Schema/**/*.graphqls"
+    ]
+  },
+  "output": {
+    "testMocks": {
+      "none": {}
+    },
+    "schemaTypes": {
+      "path": "Sources/MobileCoreAPI_Generated/SchemaTypes.swift",
+      "moduleType": {
+        "swiftPackageManager": {
+          "moduleName": "MobileCoreAPI_Generated"
+        }
+      }
+    },
+    "operations": {
+      "relative": {
+        "path": "Sources/MobileCoreAPI_Generated/Operations"
+      }
+    }
+  },
+  "schemaDownloadConfiguration": {
+    "downloadMethod": {
+      "introspection": {
+        "endpointURL": "https://apollo-fullstack-tutorial.herokuapp.com/graphql",
+        "httpMethod": { "POST": {} },
+        "includeDeprecatedInputValues": false,
+        "outputFormat": "SDL"
+      }
+    },
+    "downloadTimeout": 60,
+    "headers": [],
+    "outputPath": "Sources/MobileCoreAPI_Generated/Schema/schema.graphqls"
+  }
+}
